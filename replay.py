@@ -1,6 +1,6 @@
 import numpy as np
 
-class replayMemory:
+class ReplayMemory:
     '''
     This class is used to store the experiences of the agent.
     
