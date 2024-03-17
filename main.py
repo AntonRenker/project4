@@ -19,12 +19,12 @@ def train_agents(env, rows=4, columns=4, N=100_000, num_episodes=100, gamma=0.99
 
     for episode in range(num_episodes):
         for _ in range(1000):
-            part_train(Q_1, Q_2, Q_1_target, D_1, env, gamma, alpha, epsilon, batch_size, C)
-            part_train(Q_2, Q_1, Q_2_target, D_2, env, gamma, alpha, epsilon, batch_size, C)
+            part_train(Q_1, Q_2, Q_1_target, D_1, env, gamma, alpha, epsilon, batch_size, C, player=1)
+            part_train(Q_2, Q_1, Q_2_target, D_2, env, gamma, alpha, epsilon, batch_size, C, player=2)
 
     return Q_1, Q_2
         
-def part_train(Q_1, Q_2, Q_1_target, D, env, gamma, alpha, epsilon, batch_size, C): 
+def part_train(Q_1, Q_2, Q_1_target, D, env, gamma, alpha, epsilon, batch_size, C, player): 
     state = env.reset() # TBD
     done = False
             
@@ -45,10 +45,10 @@ def part_train(Q_1, Q_2, Q_1_target, D, env, gamma, alpha, epsilon, batch_size, 
         # Set y_j = r_j if episode terminates at step j+1 
         # else r_j + gamma * max_a' Q'(s_j+1, a'; h')
         
+        # Not correct yet
         states = np.array(states)
         actions = np.array(actions).reshape(-1, 1)  # Reshape, um eine Spalte zu erzeugen
         states_actions = np.concatenate([states, actions], axis=1)
-
         y_j = rewards if done else rewards + gamma * np.max(Q_1_target.predict(states_actions), axis=1)
 
         # Perform a gradient descent step on (y_j - Q(s_j, a_j; h))^2 with respect to the network parameters h
