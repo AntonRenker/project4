@@ -32,10 +32,15 @@ class ReplayMemory:
             self.idx = (self.idx + 1) % self.capacity
     
     def sample(self, batch_size) -> tuple:
-        if len(self.buffer) < batch_size:
+        if len(self.memory) < batch_size:
             batch_size = len(self.memory)
-            indeces = np.random.choice(len(self.memory), batch_size, replace=False)
+        indeces = np.random.choice(len(self.memory), batch_size, replace=False)
         
-        sampled_steps = [self.memory[i] for i in indeces]
-        states, actions, rewards, next_states = zip(*sampled_steps)
+        states, actions, rewards, next_states = [], [], [], []
+        for i in indeces:
+            state, action, reward, next_state = self.memory[i]
+            states.append(list(state))
+            actions.append(action)
+            rewards.append(reward)
+            next_states.append(list(next_state))
         return states, actions, rewards, next_states
