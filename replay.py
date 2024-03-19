@@ -23,8 +23,8 @@ class ReplayMemory:
         self.memory = []
         self.idx = 0
     
-    def add(self, state, action, reward, next_state) -> None:
-        expirience = (state, action, reward, next_state)
+    def add(self, state, action, reward, next_state, done) -> None:
+        expirience = (state, action, reward, next_state, done)
         if len(self.memory) < self.capacity:
             self.memory.append(expirience)
         else:
@@ -36,11 +36,12 @@ class ReplayMemory:
             batch_size = len(self.memory)
         indeces = np.random.choice(len(self.memory), batch_size, replace=False)
         
-        states, actions, rewards, next_states = [], [], [], []
+        states, actions, rewards, next_states, dones = [], [], [], [], []
         for i in indeces:
-            state, action, reward, next_state = self.memory[i]
+            state, action, reward, next_state, done = self.memory[i]
             states.append(list(state))
             actions.append(action)
             rewards.append(reward)
             next_states.append(list(next_state))
-        return states, actions, rewards, next_states
+            dones.append(done)
+        return states, actions, rewards, next_states, dones
