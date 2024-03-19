@@ -10,18 +10,10 @@ class Environment:
     def reset(self) -> tuple:
         self.board = np.zeros(self.num_columns * self.num_rows)
         return self.board
-    
+
     def __check_action(self, action) -> bool:
-        # try:
-        #     return self.board[self.num_rows * self.num_columns - (self.num_columns - action)] == 0
-        # except:
-        #     print("Invalid action:", action)
-        #     print("Num columns:", self.num_columns)
-        #     print("Num rows:", self.num_rows)
-        #     print("Index:", self.num_rows * self.num_columns - (self.num_columns - action))
-        #     print("Board:", self.board)
         return self.board[self.num_rows * self.num_columns - (self.num_columns - action)] == 0
-    
+
     def __update_board(self, action, player) -> None:
         for i in range(action, self.num_columns * self.num_rows, self.num_columns):
             if self.board[i] == 0:
@@ -88,14 +80,14 @@ class Environment:
             if np.random.rand() < epsilon:
                 action = np.random.randint(self.num_columns)
             else:
-                action = self.__get_max_action(Q)
+                state = np.array([self.board])
+                act_values = Q.predict(state)
+                action = np.argmax(act_values[0])
 
             valid = self.__check_action(action)
         return action
 
     def step(self, action, player, Q) -> tuple:
-        done = False
-
         # Check if the action is valid
         if self.__check_action(action):
             # Update the board
