@@ -61,33 +61,20 @@ class Environment:
                     return True
 
         return False
-    
-    def __get_max_action(self, Q) -> int:
-        max_value = float('-inf')
-        max_action = 0
-        for i in range(self.num_columns):
-            state_action = np.concatenate((self.board, [i])).reshape(1, -1)
-            value = Q.predict(state_action)
-            if value > max_value:
-                max_value = value
-                max_action = i
-        return max_action
                 
-    def __get_action(self, Q) -> int:
-        epsilon = 0.1
-        valid = False
-        while not valid:
-            if np.random.rand() < epsilon:
-                action = np.random.randint(self.num_columns)
-            else:
-                state = np.array([self.board])
-                act_values = Q.predict(state)
-                action = np.argmax(act_values[0])
-
-            valid = self.__check_action(action)
+    def __get_action(self, Q, epsilon) -> int:
+        possible_actions = [i for i in range(self.num_columns) if self.__check_action(i)]
+        if np.random.rand() < epsilon:
+            action = np.random.choice(possible_actions)
+        else:
+            state = np.array([self.board])
+            act_values = Q.predict(state)
+            action = np.argmax(act_values[0])
+            if action not in possible_actions:
+                action = np.random.choice(possible_actions)
         return action
 
-    def step(self, action, player, Q) -> tuple:
+    def step(self, action, player, Q, epsilon) -> tuple:
         # Check if the action is valid
         if self.__check_action(action):
             # Update the board
@@ -99,7 +86,7 @@ class Environment:
                 return self.board, 0, True
             else:
                 # Do epsilon greedy move based on Q
-                action = self.__get_action(Q)
+                action = self.__get_action(Q, epsilon)
                 self.__update_board(action, -player)
                 # Check if the game is over
                 if self.__check_win(-player):
@@ -109,6 +96,22 @@ class Environment:
                 else:
                     # Game is not over
                     return self.board, 0, False
+        else:
+            return self.board, -100, True
+        
+    def single_step(self, action, player) -> tuple:
+        # Check if the action is valid
+        if self.__check_action(action):
+            # Update the board
+            self.__update_board(action, player)
+            # Check if the game is over
+            if self.__check_win(player):
+                return self.board, 1, True
+            elif np.all(self.board != 0):
+                return self.board, 0, True
+            else:
+                # Game is not over
+                return self.board, 0, False
         else:
             return self.board, -100, True
         
